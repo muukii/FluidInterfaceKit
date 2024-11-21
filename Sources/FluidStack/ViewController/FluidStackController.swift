@@ -6,8 +6,8 @@ import FluidPortal
 /// Actions that comes from ``FluidStackController``
 public enum FluidStackAction {
 
-  /// on started push operation in the stack
-  /// dispatches after viewDidLoad, added in hierarchy, before transitioning
+  /// It will appear on a stack.
+  /// Emits before the transition starts but after viewDidLoad and inserted into the stack.
   case willPush
 
   /// Potentially it won't be emmited after ``FluidStackAction/willPush``
@@ -18,10 +18,6 @@ public enum FluidStackAction {
 
   /// Potentially it won't be emmited after ``FluidStackAction/willPop``
   case didPop
-
-  /// will become currenty top view controller on the stack.
-  /// that happens on push and pop higher view controller.
-  case willBecomeTop
 }
 
 public enum RemovingRule {
@@ -328,8 +324,7 @@ open class FluidStackController: UIViewController {
     
     // propagate after `viewDidLoad`
     viewControllerToAdd.propagateStackAction(.willPush)
-    viewControllerToAdd.propagateStackAction(.willBecomeTop)
-        
+
     // take before modifying.
     let currentTop = stackingItems.last
     
@@ -487,7 +482,7 @@ open class FluidStackController: UIViewController {
     }()
     
     platterView.viewController.propagateStackAction(.willPop)
-    backView?.viewController.propagateStackAction(.willBecomeTop)
+    backView?.viewController.propagateStackAction(.willPush)
     
     let newTransitionContext = RemovingTransitionContext(
       contentView: platterView,

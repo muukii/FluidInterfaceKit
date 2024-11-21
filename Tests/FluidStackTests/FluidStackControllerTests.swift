@@ -445,8 +445,15 @@ final class FluidStackControllerTests: XCTestCase {
 
     let childStack = FluidStackController(configuration: .init(retainsRootViewController: false))
 
+    let childExp = expectation(description: "child")
+
     childStack.addFluidStackActionHandler { action in
-      XCTFail("Never gets any actions on child")
+
+      if case .willPush = action {
+        // child will get an event that happens in the higher layer.
+        childExp.fulfill()
+      }
+
     }
 
     let expWillPop = expectation(description: "called")
@@ -466,8 +473,6 @@ final class FluidStackControllerTests: XCTestCase {
         break
       case .didPop:
         expDidPop.fulfill()
-      case .willBecomeTop:
-        break
       }
     }
 
@@ -481,7 +486,7 @@ final class FluidStackControllerTests: XCTestCase {
 
     stack.topViewController?.fluidPop()
 
-    wait(for: [expWillPop, expDidPop], timeout: 1)
+    wait(for: [expWillPop, expDidPop, childExp], timeout: 1)
   }
 
   func testPropagationActions_willBecomeTop() {
@@ -495,15 +500,13 @@ final class FluidStackControllerTests: XCTestCase {
     controller_1.addFluidStackActionHandler { action in
       switch action {
       case .willPush:
-        break
+        expWillBecomeTop.fulfill()
       case .willPop:
         break
       case .didPush:
         break
       case .didPop:
         break
-      case .willBecomeTop:
-        expWillBecomeTop.fulfill()
       }
     }
 

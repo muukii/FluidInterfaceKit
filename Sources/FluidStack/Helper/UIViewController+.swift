@@ -158,16 +158,23 @@ extension UIViewController {
   func propagateStackAction(_ action: FluidStackAction) {
     
     func _propagateRecursively(viewController: UIViewController) {
-      
-      guard (viewController is FluidStackController) == false else {
+
+      if let stackController = viewController as? FluidStackController {
+
+        for handler in stackController.fluidStackActionHandlers {
+          handler(action)
+        }
+
+        stackController.topViewController?.propagateStackAction(action)
+
         return
       }
-      
+
       // call all of handlers
-      viewController.fluidStackActionHandlers.forEach {
-        $0(action)
+      for handler in viewController.fluidStackActionHandlers {
+        handler(action)
       }
-      
+
       // propagates to children
       for viewController in viewController.children {
         // recursive
